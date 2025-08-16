@@ -17,41 +17,6 @@ env:
   EXPORT_NAME: omnibuilder_test_project
   PROJECT_PATH: test_project
 jobs:
-  verify_tools:
-    strategy:
-      matrix:
-        include:
-          # - build_image: ${{ inputs.build_image }}-vanilla
-          #   artifact_tag: vanilla
-          - build_image: ${{ inputs.build_image }}
-            artifact_tag: mono
-    name: Verify Tools
-    runs-on: ubuntu-latest
-    container:
-      image: ${{ matrix.build_image }}
-    steps:
-      - name: Fix paths for Github
-        run: setup_github_paths.sh
-      - name: Show env
-        run: env
-      - name: Show PATH
-        run: echo $PATH
-      - name: Show HOME
-        run: echo $HOME
-      - name: Godot
-        run: godot --version
-      - name: Blender
-        run: blender --version
-      - name: Dotnet
-        run: dotnet --version
-      - name: Scons
-        run: scons --version
-      - name: RustUp
-        run: rustup --version
-      - name: Rust Toolchains
-        run: rustup toolchain list
-      - name: EMSDK
-        run: emsdk list
 
   build_project_linux:
     strategy:
@@ -73,10 +38,10 @@ jobs:
           lfs: true
 
       - name: Fix paths for Github
-        run: setup_github_paths.sh
+        run: ../setup_github_paths.sh
 
       - name: Setup Editor Settings Environment
-        run: setup_editor_settings_version.sh
+        run: ../setup_editor_settings_version.sh
 
       - name: Show environment
         run: env

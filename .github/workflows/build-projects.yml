@@ -1,4 +1,4 @@
-name: Verify Test Projects
+name: Export Project
 on:
   workflow_dispatch:
     inputs:
@@ -7,75 +7,33 @@ on:
         required: true
         type: string
         default: 'game1'
-      build_image:
-        description: The image to build the projects against
-        required: true
-        type: string
-        default: 'witchpixels/godot4-omnibuilder3d:latest-4.4'
-  
+        
 env:
-  EXPORT_NAME: omnibuilder_test_project
-  PROJECT_PATH: test_project
-jobs:
-
+  EXPORT_NAME: cool_godot_game # change this to whatever you like
+jobs: 
   build_project_linux:
-    strategy:
-      matrix:
-        include:
-          - build_image: ${{ inputs.build_image }}
-            artifact_tag: mono
-    name: Build Test Project (Linux)
+    name: Build Project (Linux)
     runs-on: ubuntu-latest
     container:
-      image: ${{ matrix.build_image }}
-      env:
-        EXPORT_NAME: omnibuilder_test_project
-        PROJECT_PATH: test_project
+      image: witchpixels/godot4-omnibuilder3d:latest-4.4
     steps:
       - name: Checkout
         uses: actions/checkout@v5
         with:
           lfs: true
 
-      - name: SHOW ENVIRONEMNT LS
-        run: ls -la
-
+      # You only need this for Github Actions, Gitlab works out of the box
       - name: Fix paths for Github
         run: setup_github_paths.sh
 
- 
-
-      - name: Setup Editor Settings Environment
-        run: setup_editor_settings_version.sh
-
-      - name: Show environment
-        run: env
-        
-      - name: Show editor settings
-        run: cat $GODOT_EDITOR_SETTINGS_PATH
-
-      - name: Prebuild
+      - name: Linux Build
+        working-directory: test_project
         run: |
           mkdir -v -p build/linux
-          cd $PROJECT_PATH
-          godot -v --headless --import
+          godot -v --headless --export-release "Linux/X11" build/linux/$EXPORT_NAME.x86_64
 
-      - name: Show imported asset directory
-        run: ls -la $PROJECT_PATH/.godot/imported
-
-      - name: Validate that blender files were imported
-        run: |
-          cd $PROJECT_PATH
-          ./validate_imports.sh
-
-      - name: Linux Build
-        run: |
-          cd $PROJECT_PATH
-          godot -v --headless --export-release "Linux/X11" ../build/linux/$EXPORT_NAME-${{ inputs.sem_ver }}-${{ matrix.artifact_tag }}.x86_64
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.EXPORT_NAME }}-${{ inputs.sem_ver }}-linux-${{ matrix.artifact_tag }}
-          path: build/linux
-
-  
+          name: ${{ env.EXPORT_NAME }}-linux
+          path: test_project/build/linux

@@ -1,0 +1,152 @@
+name: Export Project w/ Addons
+
+run-name: "Export Project -  ${{ inputs.game_dir }} - ${{ inputs.linux_release_name }} - ${{ inputs.addon_inv_mgr_version }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      game_dir:
+        description: 'version of demo game'
+        required: true
+        type: string
+        default: 'test_game1'
+      linux_release_name:
+        description: 'export build name for linux'
+        required: true
+        default: 'Linux/X11'
+        type: choice
+        options:
+          - 'Linux'
+          - 'Linux/X11'
+      addon_inv_mgr_version:
+        description: 'addon inv mgr version'
+        required: true
+        default: 'addon-2.9.2'
+        type: choice
+        options:
+          - 'addon-2.9.2'
+          - 'addon-2.6.3'
+
+
+env:
+  EXPORT_NAME: cool_godot_game-${{ inputs.game_dir }} # change this to whatever you like
+jobs: 
+  build_project_linux:
+    name: Build Project (Linux)
+    runs-on: ubuntu-latest
+    container:
+      image: witchpixels/godot4-omnibuilder3d:latest-4.4.1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          lfs: true
+
+      # You only need this for Github Actions, Gitlab works out of the box
+      - name: Fix paths for Github
+        run: setup_github_paths.sh
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y wget unzip
+
+      - name: Install Addons
+        working-directory: ${{ inputs.game_dir }}
+        run: |
+          mkdir -v -p addons
+
+          mkdir tmp-addons
+          cd tmp-addons
+          wget https://github.com/utopia-rise/fmod-gdextension/releases/download/5.0.6-4.4.0/addons.zip
+          unzip addons.zip
+          cp -r fmod ../addons
+
+          echo "---- Done Installing FMOD -----"
+          ls -la ../addons
+
+          git clone --branch ${{ inputs.addon_inv_mgr_version }} --single-branch https://github.com/expressobits/inventory-system tmp_repo
+          cp -r tmp_repo/addons/inventory-system ../addons
+          rm -rf tmp_repo
+
+          echo "---- Done Installing Inventory System -----"
+          ls -la ../addons
+          
+
+          cd ..
+          rm -rf tmp-addons
+
+          echo "---- Done Installing Addons -----"
+          ls -la addons
+
+
+      - name: Linux Build
+        working-directory: ${{ inputs.game_dir }}
+        run: |
+          mkdir -v -p build/linux
+          godot -v --headless --export-release ${{ inputs.linux_release_name }} build/linux/$EXPORT_NAME.x86_64
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.EXPORT_NAME }}-linux
+          path: ${{ inputs.game_dir }}/build/linux
+
+  build_project_windows:
+    name: Build Project (Windows Desktop)
+    runs-on: ubuntu-latest
+    container:
+      image: witchpixels/godot4-omnibuilder3d:latest-4.4.1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          lfs: true
+
+      # You only need this for Github Actions, Gitlab works out of the box
+      - name: Fix paths for Github
+        run: setup_github_paths.sh
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y wget unzip
+
+      - name: Install Addons
+        working-directory: ${{ inputs.game_dir }}
+        run: |
+          mkdir -v -p addons
+
+          mkdir tmp-addons
+          cd tmp-addons
+          wget https://github.com/utopia-rise/fmod-gdextension/releases/download/5.0.6-4.4.0/addons.zip
+          unzip addons.zip
+          cp -r fmod ../addons
+
+          echo "---- Done Installing FMOD -----"
+          ls -la ../addons
+
+          git clone --branch ${{ inputs.addon_inv_mgr_version }} --single-branch https://github.com/expressobits/inventory-system tmp_repo
+          cp -r tmp_repo/addons/inventory-system ../addons
+          rm -rf tmp_repo
+
+          echo "---- Done Installing Inventory System -----"
+          ls -la ../addons
+
+          cd ..
+          rm -rf tmp-addons
+
+          echo "---- Done Installing Addons -----"
+          ls -la addons
+
+      - name: Windows Build
+        working-directory: ${{ inputs.game_dir }}
+        run: |
+          mkdir -v -p build/windows
+          godot -v --headless --export-release "Windows Desktop" build/windows/$EXPORT_NAME.exe
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.EXPORT_NAME }}-windows
+          path: ${{ inputs.game_dir }}/build/windows

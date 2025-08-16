@@ -1,0 +1,19 @@
+[gd_resource type="InventoryDatabase" load_steps=5 format=3 uid="uid://cisw6utobgg8v"]
+
+[ext_resource type="Texture2D" uid="uid://clqnojdiimaqp" path="res://icon.svg" id="1_cjdmt"]
+[ext_resource type="Texture2D" uid="uid://bev5ov7db7lqo" path="res://apple2_chatgpt.png" id="2_v353b"]
+
+[sub_resource type="ItemDefinition" id="ItemDefinition_pnigh"]
+id = "item1"
+max_stack = 2
+name = "item1"
+icon = ExtResource("1_cjdmt")
+
+[sub_resource type="ItemDefinition" id="ItemDefinition_cjdmt"]
+id = "item2"
+max_stack = 4
+name = "a 2 item"
+icon = ExtResource("2_v353b")
+
+[resource]
+items = Array[ItemDefinition]([SubResource("ItemDefinition_pnigh"), SubResource("ItemDefinition_cjdmt")])

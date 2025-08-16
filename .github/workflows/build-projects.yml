@@ -37,11 +37,16 @@ jobs:
         with:
           lfs: true
 
+      - name: SHOW ENVIRONEMNT LS
+        run: ls -la
+
       - name: Fix paths for Github
-        run: ../setup_github_paths.sh
+        run: setup_github_paths.sh
+
+ 
 
       - name: Setup Editor Settings Environment
-        run: ../setup_editor_settings_version.sh
+        run: setup_editor_settings_version.sh
 
       - name: Show environment
         run: env

@@ -21,9 +21,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - build_image: ${{ inputs.build_image }}-vanilla
-            artifact_tag: vanilla
-          - build_image: ${{ inputs.build_image }}-mono
+          # - build_image: ${{ inputs.build_image }}-vanilla
+          #   artifact_tag: vanilla
+          - build_image: ${{ inputs.build_image }}
             artifact_tag: mono
     name: Verify Tools
     runs-on: ubuntu-latest
@@ -57,9 +57,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - build_image: ${{ inputs.build_image }}-vanilla
-            artifact_tag: vanilla
-          - build_image: ${{ inputs.build_image }}-mono
+          - build_image: ${{ inputs.build_image }}
             artifact_tag: mono
     name: Build Test Project (Linux)
     runs-on: ubuntu-latest

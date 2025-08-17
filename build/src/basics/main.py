@@ -28,7 +28,11 @@ class Basics:
         platform: Annotated[
             str,
             Doc("Target platform for export (macos or linux or windows)"),
-        ] = "macOS"
+        ] = "macOS",
+        addons: Annotated[
+            str,
+            Doc("Target platform for export (macos or linux or windows)"),
+        ] = "NONE"
     ) -> dagger.File:
         """Build and export Godot project for specified platform from existing Dockerfile"""
 
@@ -83,19 +87,26 @@ class Basics:
             .with_workdir("/GAMEDIR")  # Set working directory to Godot project
         )
 
+        await container.stdout()  # This forces the container to execute
+
         #
         # Install Addons
         #
-        # container = (
-        #     container
-        #     .with_exec(["apt-get", "update"])
-        #     .with_exec(["apt-get", "install", "-y", "wget", "unzip", "git"])
-            
-        # )
-        # # Use our install_addons function
-        # container = await self.install_addons(container, "/GAMEDIR")
+        if addons == "NONE":
+            container = container.with_exec(["echo", "----- Skipping Addons ----"])    
+        elif addons == "NORMAL":
+            container = (
+                container
+                .with_exec(["apt-get", "update"])
+                .with_exec(["apt-get", "install", "-y", "wget", "unzip", "git"])
+                
+            )
+            # # Use our install_addons function
+            container = await self.install_addons(container, "/GAMEDIR")
         
 
+        godot_command = f"godot --headless --verbose --export-release {platform_name} {export_path}"
+        container = container.with_exec(["echo", f"=== Running command: {godot_command}"])
         #
         # BUILD GAME WITH GODOT
         #
@@ -115,7 +126,9 @@ class Basics:
             ],
             expect=ReturnType.ANY
         )
+        await container.stdout()  # This forces the container to execute
         print(f"=== Godot exit code from build was:{container.exit_code} ")
+        
         
 
         #
@@ -156,13 +169,13 @@ class Basics:
                 "url": "https://github.com/utopia-rise/fmod-gdextension/releases/download/5.0.6-4.4.0/addons.zip",
                 "folder_inside": "fmod"
             },
-            # {
-            #     "type": "git_repo",
-            #     "repo_url": "https://github.com/expressobits/inventory-system",
-            #     "branch": "addon-2.9.1",
-            #     # "branch": "addon-2.6.3",
-            #     "source_path": "./addons/inventory-system"
-            # },
+            {
+                "type": "git_repo",
+                "repo_url": "https://github.com/expressobits/inventory-system",
+                # "branch": "addon-2.9.1",
+                "branch": "addon-2.6.3",
+                "source_path": "./addons/inventory-system"
+            },
             {
                 "type": "git_repo",
                 "repo_url": "https://github.com/majikayogames/SimpleDungeons",
@@ -182,10 +195,10 @@ class Basics:
             print(f"Processing item: {item}")
             
             if item["type"] == "zip_url":
-                container.with_exec(["echo", f"------- addon: {item['type']} -- {item['folder_inside']}"])
+                container = container.with_exec(["echo", f"------- addon: {item['type']} -- {item['folder_inside']}"])
                 container = await self._install_from_zip_url(container, item, addons_path)
             elif item["type"] == "git_repo":
-                container.with_exec(["echo", f"------- addon: {item['type']} -- {item['source_path']}"])
+                container = container.with_exec(["echo", f"------- addon: {item['type']} -- {item['source_path']}"])
                 container = await self._install_from_git_repo(container, item, addons_path)
             else:
                 print(f"Unknown item type: {item['type']}")

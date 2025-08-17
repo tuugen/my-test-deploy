@@ -1,6 +1,5 @@
-[gd_scene load_steps=4 format=3 uid="uid://c7my5wqcx0i4r"]
+[gd_scene load_steps=3 format=3 uid="uid://c7my5wqcx0i4r"]
 
-[ext_resource type="PackedScene" uid="uid://ctodbgtha76hw" path="res://bender_assets/d20.blend" id="1_x40oq"]
 [ext_resource type="ArrayMesh" uid="uid://bgvrjnitbd5a6" path="res://bender_assets/d20_shape.res" id="2_j72vy"]
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_6k7n7"]
@@ -11,8 +10,18 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.81533, 0)
 mass = 5.0
 continuous_cd = true
 
-[node name="d20" parent="." instance=ExtResource("1_x40oq")]
+[node name="d20" parent="."]
+_import_path = NodePath("")
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 0
+auto_translate_mode = 0
+editor_description = ""
 mesh = ExtResource("2_j72vy")
+script = null
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("ConvexPolygonShape3D_6k7n7")

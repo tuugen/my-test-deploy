@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://s6sqoc7y3q23"
 path.s3tc="res://.godot/imported/Icosphere.png-8e5d38e5831f7953482d8349c1e61419.s3tc.ctex"
+path.etc2="res://.godot/imported/Icosphere.png-8e5d38e5831f7953482d8349c1e61419.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://bender_assets/Icosphere.png"
-dest_files=["res://.godot/imported/Icosphere.png-8e5d38e5831f7953482d8349c1e61419.s3tc.ctex"]
+dest_files=["res://.godot/imported/Icosphere.png-8e5d38e5831f7953482d8349c1e61419.s3tc.ctex", "res://.godot/imported/Icosphere.png-8e5d38e5831f7953482d8349c1e61419.etc2.ctex"]
 
 [params]
 

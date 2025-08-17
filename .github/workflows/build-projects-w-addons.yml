@@ -1,4 +1,4 @@
-name: Export Project w/ Addons
+name: Export Project - Omnibuild w/ Addons
 
 run-name: "Export Project -  ${{ inputs.game_dir }} - ${{ inputs.linux_release_name }} - ${{ inputs.addon_inv_mgr_version }}"
 

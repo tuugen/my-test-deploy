@@ -7,6 +7,14 @@ on:
         required: true
         type: string
         default: 'test_project'
+      linux_release_name:
+        description: 'export build name for linux'
+        required: true
+        default: 'Linux/X11'
+        type: choice
+        options:
+          - 'Linux'
+          - 'Linux/X11'
 
 env:
   EXPORT_NAME: cool_godot_game-${{ inputs.game_dir }} # change this to whatever you like
@@ -30,7 +38,7 @@ jobs:
         working-directory: ${{ inputs.game_dir }}
         run: |
           mkdir -v -p build/linux
-          godot -v --headless --export-release "Linux/X11" build/linux/$EXPORT_NAME.x86_64
+          godot -v --headless --export-release ${{ inputs.linux_release_name }} build/linux/$EXPORT_NAME.x86_64
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4

@@ -1,0 +1,185 @@
+name: "Export Project - Dagger"
+
+run-name: "Export Project - Dagger -  ${{ inputs.game_dir }} - ${{ inputs.platforms == 'all' && 'All Platforms' || inputs.platforms }}"
+
+permissions:
+  contents: write  # allows creating releases
+  
+on:
+  workflow_dispatch:
+    inputs:
+      game_dir:
+        description: 'version of demo game'
+        required: true
+        type: string
+        default: 'game1'
+      platforms:
+        description: 'Select platforms to run on'
+        required: true
+        default: 'macos'
+        type: choice
+        options:
+          - 'macos'
+          - 'linux'
+          - 'windows'
+          - 'all'
+          
+    # not possible to run docker on macos machine....
+    # https://stackoverflow.com/a/78202969/5198805
+    
+    # so we cannot run arm64 ...
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Set up matrix
+        id: set-matrix
+        run: |
+          case "${{ github.event.inputs.platforms }}" in
+            "macos")
+              echo "matrix=[\"macos\"]" >> $GITHUB_OUTPUT
+              ;;
+            "linux")
+              echo "matrix=[\"linux\"]" >> $GITHUB_OUTPUT
+              ;;
+            "windows")
+              echo "matrix=[\"windows\"]" >> $GITHUB_OUTPUT
+              ;;
+            "all")
+              echo "matrix=[\"linux\", \"macos\", \"windows\"]" >> $GITHUB_OUTPUT
+              ;;
+          esac
+          
+  build_game:
+    name: "Build Game"
+    needs: setup
+#    runs-on: macos-13 # intel
+    runs-on: ubuntu-latest
+    #    runs-on: ubuntu-24.04-arm  #not available in private repo
+    #   https://docs.github.com/en/actions/reference/runners/github-hosted-runners#standard-github-hosted-runners-for--private-repositories
+    # Use ARM64 runner if available in your organization
+    # runs-on: [self-hosted, linux, arm64]  # Uncomment if you have ARM64 self-hosted runners
+    strategy:
+      matrix:
+        platform: ${{ fromJson(needs.setup.outputs.matrix) }}   
+#    strategy:
+#      matrix:
+#        #        platform: [macos, linux, windows]
+#        platform: [ linux ]
+##        platform: [ macos ]
+    
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          lfs: true  # Enable Git LFS file fetching
+
+      - name: Pull Git LFS files
+        run: git lfs pull
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Dagger
+        run: |
+          pip install dagger-io
+
+      - name: Install Dagger CLI
+        run: |
+          curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=/usr/local/bin sudo -E sh
+          type dagger
+          dagger version
+
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Preview game_dir contents
+        working-directory: ./build
+        run: |
+          cd ${{ inputs.game_dir }}
+          ls -la 
+
+      - name: Preview project.godot and export_presets.cfg
+        working-directory: ./build
+        run: |
+          echo -e "\n\n===================="
+          echo "project.godot"
+          echo -e "====================\n\n"
+          
+          cd ${{ inputs.game_dir }}
+          cat project.godot
+          echo -e "\n\n===================="
+          echo "export_presets.cfg"
+          echo -e "====================\n\n"
+          cat export_presets.cfg
+
+      - name: Build and export game for ${{ matrix.platform }}
+        working-directory: ./build
+        run: |
+          
+          dagger --verbose call my-build-and-copy-2 \
+            --platform_build_container=x86_64 \
+            --platform=${{ matrix.platform }} \
+            --game_dir=${{ inputs.game_dir }} \
+            --src=. \
+            export --path=./game-${{ matrix.platform }}.zip
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-${{ matrix.platform }}
+          path: ./build/game-${{ matrix.platform }}.zip
+          retention-days: 30
+
+      - name: Verify build
+        run: |
+          if [ -f "./build/game-${{ matrix.platform }}.zip" ]; then
+            echo "✅ Build successful for ${{ matrix.platform }}"
+            ls -lh ./build/game-${{ matrix.platform }}.zip
+          else
+            echo "❌ Build failed for ${{ matrix.platform }}"
+            exit 1
+          fi
+
+  # Optional: Create a release if this is a tagged commit
+  create-release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build_game
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R ./artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./artifacts/**/*.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+#      - name: Create Release
+#        uses: softprops/action-gh-release@v2
+#        with:
+#          files: |
+#            ./artifacts/game-macos/game-macos.zip
+#            ./artifacts/game-linux/game-linux.zip
+#          draft: false
+#          prerelease: false
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

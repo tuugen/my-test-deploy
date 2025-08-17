@@ -23,7 +23,7 @@ jobs:
     name: Build Project (Linux)
     runs-on: ubuntu-latest
     container:
-      image: witchpixels/godot4-omnibuilder3d:latest-4.4
+      image: witchpixels/godot4-omnibuilder3d:latest-4.4.1
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -50,7 +50,7 @@ jobs:
     name: Build Project (Windows Desktop)
     runs-on: ubuntu-latest
     container:
-      image: witchpixels/godot4-omnibuilder3d:latest-4.1.1
+      image: witchpixels/godot4-omnibuilder3d:latest-4.4.1
     steps:
       - name: Checkout
         uses: actions/checkout@v5

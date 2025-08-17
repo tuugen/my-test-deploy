@@ -43,15 +43,15 @@ class Basics:
 
         if platform_build_container == "x86_64":
             my_build_args: List[BuildArg] = [
-                # BuildArg("GODOT_VERSION", "4.4.1"),
-                BuildArg("GODOT_VERSION", "4.4"),
+                BuildArg("GODOT_VERSION", "4.4.1"),
+                # BuildArg("GODOT_VERSION", "4.4"),
                 BuildArg("GODOT_PLATFORM", "linux.x86_64"),    
                 BuildArg("GODOT_ZIP_PLATFORM", "linux_x86_64"),
             ] 
         if platform_build_container == "arm64":
             my_build_args: List[BuildArg] = [
-                # BuildArg("GODOT_VERSION", "4.4.1"),
-                BuildArg("GODOT_VERSION", "4.4"),
+                BuildArg("GODOT_VERSION", "4.4.1"),
+                # BuildArg("GODOT_VERSION", "4.4"),
                 BuildArg("GODOT_PLATFORM", "linux.arm64"),
                 BuildArg("GODOT_ZIP_PLATFORM", "linux_arm64"),
             ] 
@@ -82,7 +82,7 @@ class Basics:
         
         container = (
             container
-            .with_env_variable("GODOT_VERSION", "4.4")
+            .with_env_variable("GODOT_VERSION", "4.4.1")
             .with_exec(["mkdir", "-p", export_dir])  # Create build/<platform> directory
             .with_workdir("/GAMEDIR")  # Set working directory to Godot project
         )

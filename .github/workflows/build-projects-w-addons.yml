@@ -6,7 +6,7 @@ on:
         description: 'version of demo game'
         required: true
         type: string
-        default: 'test_project'
+        default: 'test_game1'
       linux_release_name:
         description: 'export build name for linux'
         required: true
@@ -23,7 +23,7 @@ jobs:
     name: Build Project (Linux)
     runs-on: ubuntu-latest
     container:
-      image: witchpixels/godot4-omnibuilder3d:latest-4.4
+      image: witchpixels/godot4-omnibuilder3d:latest-4.4.1
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -36,8 +36,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wget unzip
+          apt-get update
+          apt-get install -y wget unzip
 
       - name: Install Addons
         working-directory: ${{ inputs.game_dir }}
@@ -82,7 +82,7 @@ jobs:
     name: Build Project (Windows Desktop)
     runs-on: ubuntu-latest
     container:
-      image: witchpixels/godot4-omnibuilder3d:latest-4.1.1
+      image: witchpixels/godot4-omnibuilder3d:latest-4.4.1
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -92,6 +92,37 @@ jobs:
       # You only need this for Github Actions, Gitlab works out of the box
       - name: Fix paths for Github
         run: setup_github_paths.sh
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y wget unzip
+
+      - name: Install Addons
+        working-directory: ${{ inputs.game_dir }}
+        run: |
+          mkdir -v -p addons
+
+          mkdir tmp-addons
+          cd tmp-addons
+          wget https://github.com/utopia-rise/fmod-gdextension/releases/download/5.0.6-4.4.0/addons.zip
+          unzip addons.zip
+          cp -r fmod ../addons
+
+          git clone --branch 2.6.3 --single-branch https://github.com/expressobits/inventory-system tmp_repo
+          cp -r tmp_repo/addons/inventory-system ../addons
+          rm -rf tmp_repo
+
+          
+          git clone --branch main --single-branch https://github.com/majikayogames/SimpleDungeons tmp_repo
+          cp -r tmp_repo/addons/SimpleDungeons ../addons
+          rm -rf tmp_repo
+
+          cd ..
+          rm -rf tmp-addons
+
+          echo "---- Done Installing Addons -----"
+          ls -la addons
 
       - name: Windows Build
         working-directory: ${{ inputs.game_dir }}

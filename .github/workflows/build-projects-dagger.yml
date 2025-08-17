@@ -1,3 +1,9 @@
+#
+# TODO: Add a self-hosted runner
+#       Copy this pipeline
+#       Build for mac arm64 only
+#
+
 name: "Export Project - Dagger"
 
 run-name: "Export Project - Dagger -  ${{ inputs.game_dir }} - ${{ inputs.platforms == 'all' && 'All Platforms' || inputs.platforms }}"

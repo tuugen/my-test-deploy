@@ -50,10 +50,15 @@ jobs:
           unzip addons.zip
           cp -r fmod ../addons
 
-          git clone --branch 2.6.3 --single-branch https://github.com/expressobits/inventory-system tmp_repo
+          echo "---- Done Installing FMOD -----"
+          ls -la ../addons
+
+          git clone --branch addon-2.6.3 --single-branch https://github.com/expressobits/inventory-system tmp_repo
           cp -r tmp_repo/addons/inventory-system ../addons
           rm -rf tmp_repo
 
+          echo "---- Done Installing Inventory System -----"
+          ls -la ../addons
           
           git clone --branch main --single-branch https://github.com/majikayogames/SimpleDungeons tmp_repo
           cp -r tmp_repo/addons/SimpleDungeons ../addons
@@ -109,10 +114,15 @@ jobs:
           unzip addons.zip
           cp -r fmod ../addons
 
-          git clone --branch 2.6.3 --single-branch https://github.com/expressobits/inventory-system tmp_repo
+          echo "---- Done Installing FMOD -----"
+          ls -la ../addons
+
+          git clone --branch addon-2.6.3 --single-branch https://github.com/expressobits/inventory-system tmp_repo
           cp -r tmp_repo/addons/inventory-system ../addons
           rm -rf tmp_repo
 
+          echo "---- Done Installing Inventory System -----"
+          ls -la ../addons
           
           git clone --branch main --single-branch https://github.com/majikayogames/SimpleDungeons tmp_repo
           cp -r tmp_repo/addons/SimpleDungeons ../addons
